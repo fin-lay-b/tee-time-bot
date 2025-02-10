@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 
 from whitecraigs.access2 import BookingConfig
+from whitecraigs.access2 import BookingSession
 
 # Set constants for login details
 # Do I want to share this publicly? Probably not
@@ -25,3 +26,8 @@ config = BookingConfig(
     booking_url=BOOKING_URL,
     conduct_form_url=CONDUCT_FORM_URL,
 )
+
+# Create session object for booking
+session = BookingSession(config).load_booking_page()
+
+# Book a tee time
