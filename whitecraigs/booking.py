@@ -49,14 +49,28 @@ def get_inputs(row: str):
 
 if __name__ == "__main__":
 
+    def all_tee_times(html):
+        soup = BeautifulSoup(html, "html.parser")
+        time_slots = soup.find_all("th", class_="slot-time")
+
+        tee_times = []
+        for slot in time_slots:
+            time = slot.text.strip()
+            tee_times.append(time)
+
+        return tee_times
+
     with open("./booking_response.html", "r", encoding="utf-8") as file:
         html_content = file.read()
 
-    rows = select_rows(str(html_content), "21", "00")
+    # rows = select_rows(str(html_content), "21", "00")
 
-    if rows:  # Check if any rows were found
-        # Convert the first row to string and pass it
-        inputs = get_inputs(str(rows))
-        print(inputs)
-    else:
-        print("No matching rows found")
+    # if rows:  # Check if any rows were found
+    #     # Convert the first row to string and pass it
+    #     inputs = get_inputs(str(rows))
+    #     print(inputs)
+    # else:
+    #     print("No matching rows found")
+
+    tee_times = all_tee_times(html_content)
+    print(tee_times)

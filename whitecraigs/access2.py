@@ -1,27 +1,34 @@
+from pydantic import BaseModel, Field
 import requests
-from typing import Optional
-from pydantic import BaseModel
 
 
+# Can add more validation restraint to the fields
 class BookingConfig(BaseModel):
-    member_id: str
-    member_pin: str
-    login_url: str
-    certificate_path: str
-    booking_url: str
-    conduct_form_url: str
+    member_id: str = Field(..., description="Member ID for golf club")
+    member_pin: str = Field(..., description="PIN for golf club")
+    login_url: str = Field(..., description="URL for login page")
+    certificate_path: str = Field(..., description="Path to certificate")
+    booking_url: str = Field(..., description="URL for booking page")
+    conduct_form_url: str = Field(..., description="URL for code of conduct form")
 
 
+# To add:
+# Timeout if login takes too long
 class BookingSession:
-    def __init__(self, config: BookingConfig):
-        self.member_id: str = config.member_id
-        self.member_pin: str = config.member_pin
-        self.login_url: str = config.login_url
-        self.certificate_path: str = config.certificate_path
-        self.booking_url: str = config.booking_url
-        self.conduct_form_url: str = config.conduct_form_url
-        self._session: Optional[requests.Session] = None
+    """
+    Gets to right session using requests for booking a tee time.
 
+    Args:
+        ...
+    Returns:
+        requests.session object
+    """
+
+    def __init__(self, config: BookingConfig):
+        self.config = config
+        self._session: requests.Session = None
+
+    # Remove property and initialise in __init__?
     @property
     def session(self) -> requests.Session:
         if self._session is None:
@@ -29,9 +36,9 @@ class BookingSession:
         return self._session
 
     def login(self):
-        login_data = {"memberid": self.member_id, "pin": self.member_pin}
+        login_data = {"memberid": self.config.member_id, "pin": self.config.member_pin}
         login_response = self.session.post(
-            self.login_url, data=login_data, verify=self.certificate_path
+            self.config.login_url, data=login_data, verify=self.config.certificate_path
         )
 
         if login_response.ok:
@@ -43,7 +50,7 @@ class BookingSession:
 
     def nav_to_booking(self):
         booking_response = self.session.get(
-            self.booking_url, verify=self.certificate_path
+            self.config.booking_url, verify=self.config.certificate_path
         )
 
         if not booking_response.ok:
@@ -54,8 +61,8 @@ class BookingSession:
             print("⚠️ Code of Conduct page detected! Accepting...")
 
             conduct_response = self.session.get(
-                self.conduct_form_url,
-                verify=self.certificate_path,
+                self.config.conduct_form_url,
+                verify=self.config.certificate_path,
                 allow_redirects=True,
             )
 
@@ -66,7 +73,7 @@ class BookingSession:
             print("✅ Code of Conduct accepted!")
 
             final_booking_response = self.session.get(
-                self.booking_url, verify=self.certificate_path
+                self.config.booking_url, verify=self.config.certificate_path
             )
             if not final_booking_response.ok:
                 print("❌ Booking page loading failed.")

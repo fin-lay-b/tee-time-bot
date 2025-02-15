@@ -1,8 +1,12 @@
 import os
+from datetime import time
+
 from dotenv import load_dotenv
 
 from whitecraigs.access2 import BookingConfig
 from whitecraigs.access2 import BookingSession
+
+# from whitecraigs.booking2 import TeeTimeBooker
 
 # Set constants for login details
 # Do I want to share this publicly? Probably not
@@ -31,3 +35,6 @@ config = BookingConfig(
 session = BookingSession(config).load_booking_page()
 
 # Book a tee time
+# TeeTimeBooker(session, tee_time)
+
+print(session.url)
