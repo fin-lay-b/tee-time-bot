@@ -1,20 +1,10 @@
-from pydantic import BaseModel, Field
+from whitecraigs.schemas import LoginConfig
 import requests
-
-
-# Can add more validation restraint to the fields
-class BookingConfig(BaseModel):
-    member_id: str = Field(..., description="Member ID for golf club")
-    member_pin: str = Field(..., description="PIN for golf club")
-    login_url: str = Field(..., description="URL for login page")
-    certificate_path: str = Field(..., description="Path to certificate")
-    booking_url: str = Field(..., description="URL for booking page")
-    conduct_form_url: str = Field(..., description="URL for code of conduct form")
 
 
 # To add:
 # Timeout if login takes too long
-class BookingSession:
+class LoginSession:
     """
     Gets to right session using requests for booking a tee time.
 
@@ -24,7 +14,7 @@ class BookingSession:
         requests.session object
     """
 
-    def __init__(self, config: BookingConfig):
+    def __init__(self, config: LoginConfig):
         self.config = config
         self._session: requests.Session = None
 

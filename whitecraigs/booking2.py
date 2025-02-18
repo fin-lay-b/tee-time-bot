@@ -1,118 +1,59 @@
-from datetime import date, timedelta, time
-from pydantic import BaseModel, Field, ValidationInfo, field_validator
-from typing import Optional, Literal
+from datetime import date, timedelta
 import requests
 from bs4 import BeautifulSoup
+from whitecraigs.schemas import BookingSchedule, LoginConfig
 
-# booking_schedule = {
-#     "Monday": [
-#         {"start": "06:00", "end": "06:45", "range_orient": "earliest"},
-#         {"start": "18:00", "end": "19:00", "range_orient": "earliest"}
-#     ],
-#     "Tuesday": [
-#         {"start": "16:00", "end": "17:30", "range_orient": "latest"},
-#     ],
-#     ...
-
-class Booking(BaseModel):
-    start: str = Field(pattern="^([0-1][0-9]|2[0-3]):[0-5][0-9]$", 
-                       description="Start time of tee time range in 24-hour format (HH:MM)"
-    )
-    end: str = Field(pattern="^([0-1][0-9]|2[0-3]):[0-5][0-9]$",
-                     description="End time of tee time range in 24-hour format (HH:MM)"
-    )
-    range_orient: Literal["earliest", "latest"] = Field(default='earliest', 
-                                                        description="Preferred direction to search within range."
-    )
-
-    @field_validator('end')
-    def end_after_start(cls, v: str, info: ValidationInfo):
-        pass
-
-    # @validator('start', 'end', pre=True)
-    # def parse_time(cls, v):
-    #     if isinstance(v, str):
-    #         try:
-    #             return time.fromisoformat(v)
-    #         except ValueError:
-    #             raise ValueError('Time must be in HH:MM format')
-    #     return v
-
-    # @validator('end')
-    # def end_must_be_after_start(cls, v, values):
-    #     if 'start' in values and v <= values['start']:
-    #         raise ValueError('End time must be after start time')
-    #     return v
-
-
-class BookingSchedule(BaseModel):
-    pass
-#     schedule: Dict[str, List[Booking]] = Field(
-#         ...,
-#         description="Booking schedule with days of the week as keys"
-#     )
-
-#     @validator('schedule')
-#     def validate_days(cls, v):
-#         valid_days = {'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'}
-#         for day in v.keys():
-#             if day not in valid_days:
-#                 raise ValueError(f'Invalid day: {day}. Must be one of {valid_days}')
-#         return v
-
-
-# Can add more validation restraint to the fields
-class TeeTimeConfig(BaseModel):
-    session: requests.Session = Field(description="Session object for booking a tee time")
-    booking_schedule : BookingSchedule = Field(description="Booking schedule with days of the week as keys")
-
-
-# booking_schedule = {
-#     "Monday": [
-#         {"start": "06:00", "end": "06:45", "range_orient": "earliest"},
-#         {"start": "18:00", "end": "19:00", "range_orient": "earliest"}
-#     ],
-#     "Tuesday": [
-#         {"start": "16:00", "end": "17:30", "range_orient": "latest"},
-#     ],
-#     ...
 
 class TeeTimeBooker:
-    def __init__(self, config: TeeTimeConfig, day_delta: int = 11):
+    def __init__(
+        self,
+        session: requests.Session,
+        config: BookingSchedule,
+        certificate_path: str,
+        day_delta: int = 3,
+    ):
+        if not session.url:
+            raise ValueError("Session URL is not set. Make a valid request first.")
+        self.session = session
+        self._base_url = session.url
+
         self.config = config
-        self.todays_date = date.today()
-        self.day_delta = day_delta
-        self.booking_date = self.todays_date + timedelta(day_delta)
-    
-    @property
-    def booking_date_day(self):
-        return self.booking_date.strftime("%A")
+        self.certificate_path = certificate_path
+
+        self._booking_date = date.today() + timedelta(day_delta)
+        self._booking_date_day = self._booking_date.strftime("%A")
+        self._formatted_booking_date = self._booking_date.strftime("%d-%m-%Y")
+
+        self._initial_response = self.nav_to_booking_page()
 
     @property
-    def formatted_booking_date(self):
-        return self.booking_date.strftime("%d-%m-%Y")
-    
+    def booking_date(self):
+        return self._formatted_booking_date
+
+    @property
+    def booking_date_day(self):
+        return self._booking_date_day
+
     @property
     def all_tee_times(self):
-        soup = BeautifulSoup(self.config.session.text, "html.parser")
-        time_slots = soup.find_all('th', class_='slot-time')
+        soup = BeautifulSoup(self._initial_response.text, "html.parser")
+        time_slots = soup.find_all("th", class_="slot-time")
 
         tee_times = []
         for slot in time_slots:
             time = slot.text.strip()
             tee_times.append(time)
-        
-        return tee_times
-            
 
-    def nav_to_booking_date(self):
-        booking_url = f"{self.config.session.url}?date={self.formatted_booking_date}"
-        return self.config.session.get(booking_url)
+        return tee_times
+
+    def nav_to_booking_page(self):
+        booking_url = f"{self._base_url}?date={self.booking_date}"
+        return self.session.get(booking_url, verify=self.certificate_path)
 
     def select_tee_time(self):
         # Identify tee times in provided range
         # use self.all_tee_times and self.config.booking_schedule (a )
-        
+
         # loop through the tee times either from earliest or latest and select the first available
         pass
 
@@ -121,11 +62,31 @@ class TeeTimeBooker:
         if not booking_date_response.ok:
             print("❌ Failed to navigate to booking date.")
             return False
-        
-        # identify what day it is to figure out what slots are desired
-        
 
-    def _select_rows(html, hour: str, min: str)
+        # identify what day it is to figure out what slots are desired
+
+    def _booking_pattern(self) -> list:
+        """Checks the tee times available for the day against the desired booking schedule and returns the pattern of booking times that should be followed."""
+        # Get all the tee times available for the day
+        all_tee_times = self.all_tee_times
+
+        # Get the booking schedule for the day
+        start = self.config.schedule[self.booking_date_day]["start"]
+        end = self.config.schedule[self.booking_date_day]["end"]
+        orient = self.config.schedule[self.booking_date_day]["range_orient"]
+
+        # Select all tee times witin range of start and end
+        booking_pattern = []
+        for times in all_tee_times:
+            if start <= times <= end:
+                booking_pattern.append(times)
+
+        if orient == "latest":
+            booking_pattern.reverse()
+
+        return booking_pattern
+
+    def _select_rows(html, hour: str, min: str):
 
         soup = BeautifulSoup(html, "html.parser")
 
@@ -148,7 +109,6 @@ class TeeTimeBooker:
 
         return filtered_rows
 
-
     def _get_inputs(row: str):
 
         # Initialise dictionary to store hidden inputs
@@ -169,6 +129,3 @@ class TeeTimeBooker:
         inputs = {k: v for k, v in inputs.items() if k not in keys_to_remove}
 
         return inputs
-
-
-
