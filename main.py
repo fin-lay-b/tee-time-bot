@@ -16,16 +16,6 @@ CERTIFICATE_PATH = create_cert_path(cert_value)
 
 BOOKING_SCHEDULE = get_schedule(SCHEDULE_ARN)
 
-# {
-#     "Monday": [],
-#     "Tuesday": [],
-#     "Wednesday": [],
-#     "Thursday": [],
-#     "Friday": [],
-#     "Saturday": ["08:00", "10:15"],
-#     "Sunday": ["08:00"],
-# }
-
 config = LoginConfig(
     member_id=MEMBER_ID,
     member_pin=MEMBER_PIN,
@@ -33,7 +23,6 @@ config = LoginConfig(
     certificate_path=CERTIFICATE_PATH,
     schedule=BOOKING_SCHEDULE,
 )
-
 
 booking_system = BookingSystem(config)
 

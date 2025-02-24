@@ -1,5 +1,6 @@
 import boto3
 import tempfile
+import json
 
 
 def get_cert_value(cert_arn: str) -> str:
@@ -17,4 +18,4 @@ def create_cert_path(cert_value: str) -> str:
 def get_schedule(schedule_arn: str) -> dict:
     client = boto3.client("ssm")
     response = client.get_parameter(Name=schedule_arn, WithDecryption=True)
-    return response["Parameter"]["Value"]
+    return json.loads(response["Parameter"]["Value"])
