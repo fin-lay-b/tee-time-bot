@@ -6,7 +6,7 @@ ENV SSL_CERT_FILE=${LAMBDA_TASK_ROOT}/cert.crt
 ENV REQUESTS_CA_BUNDLE=${LAMBDA_TASK_ROOT}/cert.crt
 ENV CURL_CA_BUNDLE=${LAMBDA_TASK_ROOT}/cert.crt
 
-
+# Install the function's dependencies
 COPY requirements.txt ${LAMBDA_TASK_ROOT}
 RUN pip install -r requirements.txt
 
