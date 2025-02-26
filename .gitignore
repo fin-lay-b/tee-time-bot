@@ -329,3 +329,10 @@ index/*you
 .certs/
 
 package/
+
+aws/THIRD-PARTY-LICENSES
+aws/dist
+aws/install
+aws/README.md
+
+awscliv2.zip
