@@ -1,5 +1,7 @@
 FROM public.ecr.aws/lambda/python:3.12
 
+ENV PYTHONHTTPSVERIFY=0
+
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt ${LAMBDA_TASK_ROOT}
 RUN pip install -r requirements.txt

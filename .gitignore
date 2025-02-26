@@ -330,9 +330,11 @@ index/*you
 
 package/
 
-aws/THIRD-PARTY-LICENSES
-aws/dist
-aws/install
-aws/README.md
+THIRD-PARTY-LICENSES
+dist
+install
+README.md
 
 awscliv2.zip
+
+Zscaler Root CA.crt
