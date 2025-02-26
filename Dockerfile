@@ -1,8 +1,12 @@
 FROM public.ecr.aws/lambda/python:3.12
 
-ENV PYTHONHTTPSVERIFY=0
+COPY zscaler-root-ca.crt ${LAMBDA_TASK_ROOT}/cert.crt
 
-# Copy requirements first to leverage Docker cache
+ENV SSL_CERT_FILE=${LAMBDA_TASK_ROOT}/cert.crt
+ENV REQUESTS_CA_BUNDLE=${LAMBDA_TASK_ROOT}/cert.crt
+ENV CURL_CA_BUNDLE=${LAMBDA_TASK_ROOT}/cert.crt
+
+
 COPY requirements.txt ${LAMBDA_TASK_ROOT}
 RUN pip install -r requirements.txt
 

@@ -11,11 +11,14 @@ def lambda_handler(event, context):
         MEMBER_ID = os.getenv("GOLF_MEMBER_ID")
         MEMBER_PIN = os.getenv("GOLF_PIN")
         BASE_URL = os.getenv("BASE_URL")
-        CERT_ARN = os.getenv("CERTIFICATE_ARN")
+        # CERT_ARN = os.getenv("CERTIFICATE_ARN")
         SCHEDULE_ARN = os.getenv("SCHEDULE_ARN")
-
-        cert_value = get_cert_value(CERT_ARN)
-        CERTIFICATE_PATH = create_cert_path(cert_value)
+        # Use the certificate that's bundled with the Lambda
+        CERTIFICATE_PATH = os.path.join(
+            os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt"
+        )
+        # cert_value = get_cert_value(CERT_ARN)
+        # CERTIFICATE_PATH = create_cert_path(cert_value)
 
         BOOKING_SCHEDULE = get_schedule(SCHEDULE_ARN)
 
