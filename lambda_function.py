@@ -8,17 +8,18 @@ from wc_gc.booking import BookingSystem
 
 def lambda_handler(event, context):
     try:
+        # Set certificate path at the beginning
+        cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
+
+        # Configure AWS SDK to use the certificate
+        os.environ["AWS_CA_BUNDLE"] = cert_path
+
         MEMBER_ID = os.getenv("GOLF_MEMBER_ID")
         MEMBER_PIN = os.getenv("GOLF_PIN")
         BASE_URL = os.getenv("BASE_URL")
-        # CERT_ARN = os.getenv("CERTIFICATE_ARN")
         SCHEDULE_ARN = os.getenv("SCHEDULE_ARN")
-        # Use the certificate that's bundled with the Lambda
-        CERTIFICATE_PATH = os.path.join(
-            os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt"
-        )
-        # cert_value = get_cert_value(CERT_ARN)
-        # CERTIFICATE_PATH = create_cert_path(cert_value)
+
+        CERTIFICATE_PATH = cert_path
 
         BOOKING_SCHEDULE = get_schedule(SCHEDULE_ARN)
 

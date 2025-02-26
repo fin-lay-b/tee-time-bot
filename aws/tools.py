@@ -1,10 +1,13 @@
+import os
+
 import boto3
 import tempfile
 import json
 
 
 def get_cert_value(cert_arn: str) -> str:
-    client = boto3.client("ssm")
+    cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
+    client = boto3.client("ssm", verify=cert_path)
     response = client.get_parameter(Name=cert_arn, WithDecryption=True)
     return response["Parameter"]["Value"]
 
@@ -16,6 +19,7 @@ def create_cert_path(cert_value: str) -> str:
 
 
 def get_schedule(schedule_arn: str) -> dict:
-    client = boto3.client("ssm")
+    cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
+    client = boto3.client("ssm", verify=cert_path)
     response = client.get_parameter(Name=schedule_arn, WithDecryption=True)
     return json.loads(response["Parameter"]["Value"])
