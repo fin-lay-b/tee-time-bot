@@ -11,7 +11,7 @@ class BookingSystem:
         self.config = config
         self.session = requests.Session()
 
-        self.session.verify = False
+        # self.session.verify = False
 
         self._booking_date = date.today() + timedelta(day_delta)
         self._booking_date_day = self._booking_date.strftime("%A")
@@ -65,6 +65,8 @@ class BookingSystem:
         self.session.close()
 
     def _make_request(self, method, url, **kwargs):
+        # Always use verify=False regardless of what's passed in kwargs
+        kwargs["verify"] = False
         response = self.session.request(method, url, **kwargs)
         response.raise_for_status()
         return response
