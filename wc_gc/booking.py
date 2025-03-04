@@ -11,7 +11,7 @@ class BookingSystem:
         self.config = config
         self.session = requests.Session()
 
-        self.session.verify = self.config.certificate_path
+        self.session.verify = False
 
         self._booking_date = date.today() + timedelta(day_delta)
         self._booking_date_day = self._booking_date.strftime("%A")

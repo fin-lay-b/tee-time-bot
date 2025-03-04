@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Union
 
 
 class Schedule(BaseModel):
@@ -16,7 +16,9 @@ class LoginConfig(BaseModel):
     member_id: str = Field(..., description="Member ID for golf club")
     member_pin: str = Field(..., description="PIN for golf club")
     base_url: str = Field(..., description="Base URL for golf club")
-    certificate_path: str = Field(..., description="Path to certificate")
+    certificate_path: Union[str, bool, None] = Field(
+        default=None, description="Path to certificate"
+    )
     schedule: Schedule = Field(
         ..., description="Booking schedule with days of the week"
     )

@@ -1,6 +1,8 @@
 import os
 import json
 import logging
+import urllib3
+import ssl
 
 from aws.tools import get_cert_value, create_cert_path, get_schedule
 from wc_gc.schemas import LoginConfig
@@ -13,9 +15,15 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     try:
 
-        CERTIFICATE_ARN = os.getenv("CERT_ARN")
-        cert_value = get_cert_value(CERTIFICATE_ARN)
-        CERTIFICATE_PATH = create_cert_path(cert_value)
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        # Patch the SSL verification at the lowest level
+
+        ssl._create_default_https_context = ssl._create_unverified_context
+
+        # CERTIFICATE_ARN = os.getenv("CERT_ARN")
+        # cert_value = get_cert_value(CERTIFICATE_ARN)
+        # CERTIFICATE_PATH = create_cert_path(cert_value)
 
         # os.environ["AWS_CA_BUNDLE"] =
 
@@ -30,7 +38,7 @@ def lambda_handler(event, context):
             member_id=MEMBER_ID,
             member_pin=MEMBER_PIN,
             base_url=BASE_URL,
-            certificate_path=CERTIFICATE_PATH,
+            certificate_path=False,
             schedule=BOOKING_SCHEDULE,
         )
 
