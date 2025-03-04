@@ -6,8 +6,8 @@ import json
 
 
 def get_cert_value(cert_arn: str) -> str:
-    cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
-    client = boto3.client("ssm", verify=cert_path)
+    # cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
+    client = boto3.client("ssm", region_name="eu-west-2", verify=False)
     response = client.get_parameter(Name=cert_arn, WithDecryption=True)
     return response["Parameter"]["Value"]
 
@@ -19,7 +19,7 @@ def create_cert_path(cert_value: str) -> str:
 
 
 def get_schedule(schedule_arn: str) -> dict:
-    cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
-    client = boto3.client("ssm", verify=cert_path)
+    # cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
+    client = boto3.client("ssm", region_name="eu-west-2", verify=False)
     response = client.get_parameter(Name=schedule_arn, WithDecryption=True)
     return json.loads(response["Parameter"]["Value"])

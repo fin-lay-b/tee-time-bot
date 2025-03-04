@@ -1,9 +1,13 @@
 import os
 import json
+import logging
 
 from aws.tools import get_cert_value, create_cert_path, get_schedule
 from wc_gc.schemas import LoginConfig
 from wc_gc.booking import BookingSystem
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def lambda_handler(event, context):
@@ -11,8 +15,24 @@ def lambda_handler(event, context):
         # Set certificate path at the beginning
         cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
 
+        # Debug certificate existence and content
+        if os.path.exists(cert_path):
+            logger.info(f"Certificate found at {cert_path}")
+            with open(cert_path, "r") as f:
+                cert_content = f.read()
+                logger.info(f"Certificate starts with: {cert_content[:100]}")
+        else:
+            logger.error(f"Certificate NOT FOUND at {cert_path}")
+            return {"statusCode": 404, "body": "Certificate file not found"}
+
         # Configure AWS SDK to use the certificate
         os.environ["AWS_CA_BUNDLE"] = cert_path
+
+        # Set certificate path at the beginning
+        # cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
+
+        # # Configure AWS SDK to use the certificate
+        # os.environ["AWS_CA_BUNDLE"] = cert_path
 
         MEMBER_ID = os.getenv("GOLF_MEMBER_ID")
         MEMBER_PIN = os.getenv("GOLF_PIN")
