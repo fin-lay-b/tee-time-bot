@@ -45,7 +45,7 @@ class BookingSystem:
 
         booking_page = self._make_request("GET", booking_url)
 
-        preferred_tee_times = self.config.schedule[self._booking_date_day]
+        preferred_tee_times = getattr(self.config.schedule, self._booking_date_day)
 
         for time in preferred_tee_times:
 
