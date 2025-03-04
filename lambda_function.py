@@ -12,34 +12,17 @@ logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
     try:
-        # Set certificate path at the beginning
-        cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
 
-        # Debug certificate existence and content
-        if os.path.exists(cert_path):
-            logger.info(f"Certificate found at {cert_path}")
-            with open(cert_path, "r") as f:
-                cert_content = f.read()
-                logger.info(f"Certificate starts with: {cert_content[:100]}")
-        else:
-            logger.error(f"Certificate NOT FOUND at {cert_path}")
-            return {"statusCode": 404, "body": "Certificate file not found"}
+        CERTIFICATE_ARN = os.getenv("CERT_ARN")
+        cert_value = get_cert_value(CERTIFICATE_ARN)
+        CERTIFICATE_PATH = create_cert_path(cert_value)
 
-        # Configure AWS SDK to use the certificate
-        os.environ["AWS_CA_BUNDLE"] = cert_path
-
-        # Set certificate path at the beginning
-        # cert_path = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", ""), "cert.crt")
-
-        # # Configure AWS SDK to use the certificate
-        # os.environ["AWS_CA_BUNDLE"] = cert_path
+        # os.environ["AWS_CA_BUNDLE"] =
 
         MEMBER_ID = os.getenv("GOLF_MEMBER_ID")
         MEMBER_PIN = os.getenv("GOLF_PIN")
         BASE_URL = os.getenv("BASE_URL")
         SCHEDULE_ARN = os.getenv("SCHEDULE_ARN")
-
-        CERTIFICATE_PATH = cert_path
 
         BOOKING_SCHEDULE = get_schedule(SCHEDULE_ARN)
 
