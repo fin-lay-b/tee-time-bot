@@ -3,6 +3,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 import time
+import urllib3
 
 from aws.tools import get_cert_value, create_cert_path, get_schedule
 from wc_gc.schemas import LoginConfig
@@ -14,19 +15,23 @@ logger.setLevel("INFO")
 
 def lambda_handler(event, context):
     try:
+        # Block insecure request warnings (temp fix)
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
         logger.info("Starting tee time booking process...")
 
         current_time = datetime.now()
         logger.info(f"Current time: {current_time}")
 
-        target_time = current_time.replace(hour=0, minute=0, second=1, microsecond=0)
+        tomorrow = current_time + timedelta(days=1)
+        target_time = tomorrow.replace(hour=0, minute=0, second=1, microsecond=0)
 
         if current_time < target_time:
             wait_time = (target_time - current_time).total_seconds()
-            time.sleep(wait_time)
             logger.info(f"Waiting for {wait_time} seconds")
+            time.sleep(wait_time)
 
-        logger.info(f"Wait complete, current time{datetime.now()}")
+        logger.info(f"Wait complete, current time {datetime.now()}")
 
         MEMBER_ID = os.getenv("GOLF_MEMBER_ID")
         MEMBER_PIN = os.getenv("GOLF_PIN")
