@@ -1,38 +1,41 @@
 import os
 import json
 import logging
-import urllib3
-import ssl
+from datetime import datetime, timedelta
+import time
 
 from aws.tools import get_cert_value, create_cert_path, get_schedule
 from wc_gc.schemas import LoginConfig
 from wc_gc.booking import BookingSystem
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel("INFO")
 
 
 def lambda_handler(event, context):
     try:
+        logger.info("Starting tee time booking process...")
 
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        current_time = datetime.now()
+        logger.info(f"Current time: {current_time}")
 
-        # Patch the SSL verification at the lowest level
+        target_time = current_time.replace(hour=0, minute=0, second=1, microsecond=0)
 
-        ssl._create_default_https_context = ssl._create_unverified_context
+        if current_time < target_time:
+            wait_time = (target_time - current_time).total_seconds()
+            time.sleep(wait_time)
+            logger.info(f"Waiting for {wait_time} seconds")
 
-        # CERTIFICATE_ARN = os.getenv("CERT_ARN")
-        # cert_value = get_cert_value(CERTIFICATE_ARN)
-        # CERTIFICATE_PATH = create_cert_path(cert_value)
-
-        # os.environ["AWS_CA_BUNDLE"] =
+        logger.info(f"Wait complete, current time{datetime.now()}")
 
         MEMBER_ID = os.getenv("GOLF_MEMBER_ID")
         MEMBER_PIN = os.getenv("GOLF_PIN")
         BASE_URL = os.getenv("BASE_URL")
         SCHEDULE_ARN = os.getenv("SCHEDULE_ARN")
+        logger.info("Retrieved environment variables")
 
         BOOKING_SCHEDULE = get_schedule(SCHEDULE_ARN)
+        logger.info("Retrieved booking schedule")
 
         config = LoginConfig(
             member_id=MEMBER_ID,
@@ -45,14 +48,18 @@ def lambda_handler(event, context):
         booking_system = BookingSystem(config)
 
         if booking_system.login():
+            logger.info("Login successful")
             booking_system.load_booking_page()
+            logger.info("Attempting to book tee time")
             booking_system.book_tee_time()
 
         booking_system.close_session()
 
+        logger.info("Tee time booked successfully")
         return {"statusCode": 200, "message": "Tee time booked successfully"}
 
     except Exception as e:
+        logger.error(f"Error: {str(e)}")
         return {
             "statusCode": 500,
             "body": json.dumps({"success": False, "message": f"Error: {str(e)}"}),
