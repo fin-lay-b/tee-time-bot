@@ -23,16 +23,6 @@ def lambda_handler(event, context):
         current_time = datetime.now()
         logger.info(f"Current time: {current_time}")
 
-        tomorrow = current_time + timedelta(days=1)
-        target_time = tomorrow.replace(hour=0, minute=0, second=1, microsecond=0)
-
-        if current_time < target_time:
-            wait_time = (target_time - current_time).total_seconds()
-            logger.info(f"Waiting for {wait_time} seconds")
-            time.sleep(wait_time)
-
-        logger.info(f"Wait complete, current time {datetime.now()}")
-
         MEMBER_ID = os.getenv("GOLF_MEMBER_ID")
         MEMBER_PIN = os.getenv("GOLF_PIN")
         BASE_URL = os.getenv("BASE_URL")
@@ -55,6 +45,16 @@ def lambda_handler(event, context):
         if booking_system.login():
             logger.info("Login successful")
             booking_system.load_booking_page()
+            tomorrow = current_time + timedelta(days=1)
+            target_time = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
+
+            if current_time < target_time:
+                wait_time = (target_time - current_time).total_seconds()
+                logger.info(f"Waiting for {wait_time} seconds")
+                time.sleep(wait_time)
+
+            logger.info(f"Wait complete, current time {datetime.now()}")
+
             logger.info("Attempting to book tee time")
             booking_system.book_tee_time()
 
