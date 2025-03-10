@@ -48,12 +48,21 @@ def lambda_handler(event, context):
             tomorrow = current_time + timedelta(days=1)
             target_time = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
 
-            if current_time < target_time:
-                wait_time = (target_time - current_time).total_seconds()
-                logger.info(f"Waiting for {wait_time} seconds")
-                time.sleep(wait_time)
+        if current_time < target_time:
+            logger.info(f"Waiting until target time: {target_time}")
+            # Pre-load any necessary data here
 
-            logger.info(f"Wait complete, current time {datetime.now()}")
+            # Busy-waiting loop with small sleep to reduce CPU usage
+            while datetime.now() < target_time:
+                # Small sleep to avoid excessive CPU usage
+                time.sleep(0.01)  # 10ms pause
+
+            # Log exact execution time for analysis
+            execution_time = datetime.now()
+            time_diff = (execution_time - target_time).total_seconds()
+            logger.info(
+                f"Executing at {execution_time} ({time_diff:.3f} seconds from target)"
+            )
 
             logger.info("Attempting to book tee time")
             booking_system.book_tee_time()
