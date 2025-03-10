@@ -45,32 +45,24 @@ def lambda_handler(event, context):
         if booking_system.login():
             logger.info("Login successful")
             booking_system.load_booking_page()
-            tomorrow = current_time + timedelta(days=1)
-            target_time = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
-
-        if current_time < target_time:
-            logger.info(f"Waiting until target time: {target_time}")
-            # Pre-load any necessary data here
-
-            # Busy-waiting loop with small sleep to reduce CPU usage
-            while datetime.now() < target_time:
-                # Small sleep to avoid excessive CPU usage
-                time.sleep(0.001)  # 10ms pause
-
-            # Log exact execution time for analysis
-            execution_time = datetime.now()
-            time_diff = (execution_time - target_time).total_seconds()
-            logger.info(
-                f"Executing at {execution_time} ({time_diff:.3f} seconds from target)"
+            target_time = current_time.replace(
+                hour=21, minute=0, second=0, microsecond=0
             )
 
-            logger.info("Attempting to book tee time")
+            logger.info(f"Waiting until target time: {target_time}")
+
+            while datetime.now() < target_time:
+                time.sleep(0.1)
+
+            execution_time = datetime.now()
+            logger.info(f"Attempting to book tee time (time:{execution_time})")
+
             booking_system.book_tee_time()
 
-        booking_system.close_session()
+            booking_system.close_session()
 
-        logger.info("Tee time booked successfully")
-        return {"statusCode": 200, "message": "Tee time booked successfully"}
+            logger.info("Tee time booked successfully")
+            return {"statusCode": 200, "message": "Tee time booked successfully"}
 
     except Exception as e:
         logger.error(f"Error: {str(e)}")
