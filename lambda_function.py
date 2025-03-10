@@ -55,7 +55,7 @@ def lambda_handler(event, context):
             # Busy-waiting loop with small sleep to reduce CPU usage
             while datetime.now() < target_time:
                 # Small sleep to avoid excessive CPU usage
-                time.sleep(0.01)  # 10ms pause
+                time.sleep(0.001)  # 10ms pause
 
             # Log exact execution time for analysis
             execution_time = datetime.now()
