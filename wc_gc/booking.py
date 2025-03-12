@@ -7,7 +7,7 @@ from .schemas import LoginConfig
 
 class BookingSystem:
 
-    def __init__(self, config: LoginConfig, day_delta: int = 10):
+    def __init__(self, config: LoginConfig, day_delta: int = 11):
         self.config = config
         self.session = requests.Session()
 
