@@ -7,11 +7,9 @@ from .schemas import LoginConfig
 
 class BookingSystem:
 
-    def __init__(self, config: LoginConfig, day_delta: int = 11):
+    def __init__(self, config: LoginConfig, day_delta: int = 10):
         self.config = config
         self.session = requests.Session()
-
-        # self.session.verify = False
 
         self._booking_date = date.today() + timedelta(day_delta)
         self._booking_date_day = self._booking_date.strftime("%A")
