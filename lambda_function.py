@@ -52,7 +52,7 @@ def lambda_handler(event, context):
             logger.info(f"Waiting until target time: {target_time}")
 
             while datetime.now() < target_time:
-                time.sleep(0.01)
+                time.sleep(0.1)
 
             execution_time = datetime.now()
             logger.info(f"Attempting to book tee time (time:{execution_time})")
