@@ -42,21 +42,20 @@ def lambda_handler(event, context):
 
         booking_system = BookingSystem(config)
 
+        target_time = current_time.replace(hour=21, minute=0, second=0, microsecond=0)
+
+        logger.info(f"Waiting until target time: {target_time}")
+
+        while datetime.now() < target_time:
+            time.sleep(0.1)
+
+        execution_time = datetime.now()
+        logger.info(f"Attempting to book tee time (time:{execution_time})")
+
         if booking_system.login():
             logger.info("Login successful")
+
             booking_system.load_booking_page()
-            target_time = current_time.replace(
-                hour=21, minute=0, second=0, microsecond=0
-            )
-
-            logger.info(f"Waiting until target time: {target_time}")
-
-            while datetime.now() < target_time:
-                time.sleep(0.1)
-
-            execution_time = datetime.now()
-            logger.info(f"Attempting to book tee time (time:{execution_time})")
-
             booking_system.book_tee_time()
 
             booking_system.close_session()
