@@ -1,6 +1,7 @@
 import requests
 from datetime import date, timedelta
 from bs4 import BeautifulSoup
+import concurrent.futures
 
 from .schemas import LoginConfig
 
@@ -112,3 +113,9 @@ class BookingSystem:
         inputs = {k: v for k, v in inputs.items() if k not in keys_to_remove}
 
         return inputs
+
+
+if __name__ == "__main__":
+    from wc_gc.schemas import LoginConfig
+
+    config = LoginConfig()
