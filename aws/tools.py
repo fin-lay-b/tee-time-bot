@@ -23,3 +23,9 @@ def get_schedule(schedule_arn: str) -> dict:
     client = boto3.client("ssm", region_name="eu-west-2", verify=False)
     response = client.get_parameter(Name=schedule_arn, WithDecryption=True)
     return json.loads(response["Parameter"]["Value"])
+
+
+def get_calendar(calendar_arn: str) -> dict:
+    client = boto3.client("ssm", region_name="eu-west-2", verify=False)
+    response = client.get_parameter(Name=calendar_arn, WithDecryption=True)
+    return json.loads(response["Parameter"]["Value"])

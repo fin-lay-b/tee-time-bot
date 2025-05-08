@@ -90,13 +90,20 @@ def load_booking_page(
 def book_tee_time(
     session: requests.Session,
     booking_date_url: str,
-    booking_date: str,
-    booking_time: str,
-    token_key: str,
-    token_value: str,
+    booking_params: dict,
     cert_path: str,
 ):
     """Book a tee time with the specified parameters.
+
+    Example payload:]
+    {
+        "numslots": "1",
+        "date": "29-04-2025",
+        "course": "1081",
+        "group": "1",
+        "book": "20:00:00",
+        "a18d4095ff45451808e69a7645000d50e7124976f83f736cfae569809b66ed9d": "33dd60fa42aef307e4cd41665e3ca808697d737c66072ce0a692b426614b60d0",
+    }
 
     Args:
         session: Active session object with authentication
@@ -118,14 +125,7 @@ def book_tee_time(
         # Make the booking request with required parameters
         booking_response = session.get(
             booking_date_url,
-            params={
-                "numslots": "1",
-                "date": booking_date,
-                "course": "1081",
-                "group": "1",
-                "book": booking_time,
-                token_key: token_value,
-            },
+            params=booking_params,
             verify=cert_path,
         )
         # Check for errors in the booking response
@@ -209,8 +209,6 @@ def get_inputs(row: str):
         for hidden_inputs in soup.find_all("input", {"type": "hidden"}):
             inputs[hidden_inputs["name"]] = hidden_inputs["value"]
 
-        # del inputs["holes"]
-
         return inputs
 
     except Exception as e:
@@ -240,8 +238,8 @@ if __name__ == "__main__":
 
     row = select_table_row(
         s,
-        "https://whitecraigs.intelligentgolf.co.uk/memberbooking/?date=29-04-2025",
-        booking_date="29-04-2025",
+        "https://whitecraigs.intelligentgolf.co.uk/memberbooking/?date=10-05-2025",
+        booking_date="10-05-2025",
         booking_time="20:00",
         cert_path=CERT_PATH,
     )
@@ -251,50 +249,11 @@ if __name__ == "__main__":
     inputs = get_inputs(str(row))
     print(inputs)
 
-    # s.post(
-    #     "https://whitecraigs.intelligentgolf.co.uk/",
-    #     data={"memberid": "7109", "pin": "1866"},
-    #     verify=False,
-    # )
+    booking = book_tee_time(
+        s,
+        "https://whitecraigs.intelligentgolf.co.uk/memberbooking/?date=10-05-2025",
+        booking_params=inputs,
+        cert_path=CERT_PATH,
+    )
 
-    # response1 = s.get(
-    #     "https://whitecraigs.intelligentgolf.co.uk/memberbooking/",
-    #     verify=False,
-    # )
-    # print(response1.text)
-
-    # response2 = s.get(
-    #     "https://whitecraigs.intelligentgolf.co.uk/ttbconsent.php?action=accept",
-    #     allow_redirects=True,
-    #     verify=False,
-    # )
-
-    # response3 = s.post(
-    #     "https://whitecraigs.intelligentgolf.co.uk/memberbooking/",
-    #     verify=False,
-    #     data={"date": "24-04-2025"},
-    # )
-
-    # print(response3.text)
-
-    # response4 = s.get(
-    #     "https://whitecraigs.intelligentgolf.co.uk/memberbooking/",
-    #     params={
-    #         "numslots": "1",
-    #         "date": "16-04-2025",
-    #         "course": "1081",
-    #         "group": "1",
-    #         "book": "17:15:00",
-    #         "3814d9825796571fa31b6b4414471be24f492d8f790cd9330ff4d55f7c42590a": "1355084a2141983311cded666a325d69f6d100246a0f460e2fc363250442bd0b",
-    #     },
-    #     verify=False,
-    # )
-
-{
-    "numslots": "1",
-    "date": "29-04-2025",
-    "course": "1081",
-    "group": "1",
-    "book": "20:00:00",
-    "a18d4095ff45451808e69a7645000d50e7124976f83f736cfae569809b66ed9d": "33dd60fa42aef307e4cd41665e3ca808697d737c66072ce0a692b426614b60d0",
-}
+    print(booking.status_code)

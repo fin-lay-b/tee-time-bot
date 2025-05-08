@@ -27,6 +27,7 @@ def lambda_handler(event, context):
         MEMBER_PIN = os.getenv("GOLF_PIN")
         BASE_URL = os.getenv("BASE_URL")
         SCHEDULE_ARN = os.getenv("SCHEDULE_ARN")
+        # CALENDAR_ARN = os.getenv("CALENDAR_ARN")
         logger.info("Retrieved environment variables")
 
         BOOKING_SCHEDULE = get_schedule(SCHEDULE_ARN)
