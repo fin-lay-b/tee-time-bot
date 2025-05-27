@@ -93,9 +93,9 @@ def book_tee_time(
     booking_params: dict,
     cert_path: str,
 ):
-    """Book a tee time with the specified parameters.
+    """Book a tee time with the required parameters.
 
-    Example payload:]
+    Example parameters:
     {
         "numslots": "1",
         "date": "29-04-2025",
@@ -107,11 +107,8 @@ def book_tee_time(
 
     Args:
         session: Active session object with authentication
-        booking_date_url: URL of the booking page
-        booking_date: Date for the tee time in DD-MM-YYYY format
-        booking_time: Time for the tee time in HH:MM:SS format
-        token_key: Security token key required for booking
-        token_value: Security token value required for booking
+        booking_date_url: URL of the booking page for making the reservation
+        booking_params: Dictionary containing booking parameters from parsed form inputs
         cert_path: Path to SSL certificate for verification
 
     Returns:
@@ -140,7 +137,6 @@ def book_tee_time(
 def select_table_row(
     session: requests.Session,
     booking_date_url: str,
-    booking_date: str,
     booking_time: str,
     cert_path: str,
 ):
@@ -150,7 +146,6 @@ def select_table_row(
     Args:
         session (requests.Session): Active session with golf booking website
         booking_date_url (str): URL of the booking page for specific date
-        booking_date (str): Date to book in format "YYYY-MM-DD"
         booking_time (str): Time to book in format "HH:MM"
         cert_path (str): Path to SSL certificate file
 
@@ -193,6 +188,17 @@ def select_table_row(
 
 
 def get_inputs(row: str):
+    """Extract hidden input values from HTML row.
+
+    Args:
+        row (str): HTML string containing form inputs
+
+    Returns:
+        dict: Dictionary of hidden input names and values.
+
+    Raises:
+        Exception: If parsing of HTML row fails
+    """
 
     try:
 
@@ -227,33 +233,36 @@ if __name__ == "__main__":
         pin="1866",
         cert_path=CERT_PATH,
     )
+    print(login_response.cookies)
+    print(login_response.status_code)
+    print(login_response.headers)
 
-    load_response = load_booking_page(
-        s,
-        "https://whitecraigs.intelligentgolf.co.uk/memberbooking/",
-        "https://whitecraigs.intelligentgolf.co.uk/ttbconsent.php?action=accept",
-        cert_path=CERT_PATH,
-    )
-    print(load_response.status_code)
+    # load_response = load_booking_page(
+    #     s,
+    #     "https://whitecraigs.intelligentgolf.co.uk/memberbooking/",
+    #     "https://whitecraigs.intelligentgolf.co.uk/ttbconsent.php?action=accept",
+    #     cert_path=CERT_PATH,
+    # )
+    # print(load_response.status_code)
 
-    row = select_table_row(
-        s,
-        "https://whitecraigs.intelligentgolf.co.uk/memberbooking/?date=10-05-2025",
-        booking_date="10-05-2025",
-        booking_time="20:00",
-        cert_path=CERT_PATH,
-    )
+    # row = select_table_row(
+    #     s,
+    #     "https://whitecraigs.intelligentgolf.co.uk/memberbooking/?date=10-05-2025",
+    #     booking_date="10-05-2025",
+    #     booking_time="20:00",
+    #     cert_path=CERT_PATH,
+    # )
 
-    print(row)
+    # print(row)
 
-    inputs = get_inputs(str(row))
-    print(inputs)
+    # inputs = get_inputs(str(row))
+    # print(inputs)
 
-    booking = book_tee_time(
-        s,
-        "https://whitecraigs.intelligentgolf.co.uk/memberbooking/?date=10-05-2025",
-        booking_params=inputs,
-        cert_path=CERT_PATH,
-    )
+    # booking = book_tee_time(
+    #     s,
+    #     "https://whitecraigs.intelligentgolf.co.uk/memberbooking/?date=10-05-2025",
+    #     booking_params=inputs,
+    #     cert_path=CERT_PATH,
+    # )
 
-    print(booking.status_code)
+    # print(booking.status_code)
