@@ -1,52 +1,65 @@
 import requests
+import logging
+
 from wc_gc.config import (
     WCGC_BASE_URL,
+    WCGC_LOGOUT_ENDPOINT,
     WCGC_BOOKING_PAGE_ENDPOINT,
     WCGC_CONSENT_ENDPOINT,
 )
 
+logging.basicConfig(level=logging.INFO)
 # inject session
 # session = requests.Session()
 # session.verify = ...
 
 
 # Class to handle login and authentication
-class WCLogin:
-    def __init__(self, session: requests.Session):
-        self.session = session
-        self.login_url = f"{WCGC_BASE_URL}"
-        self.booking_page_url = f"{WCGC_BASE_URL}{WCGC_BOOKING_PAGE_ENDPOINT}"
-        self.consent_url = f"{WCGC_BASE_URL}{WCGC_CONSENT_ENDPOINT}"
+class WCSession:
+    def __init__(self, memberid: str, pin: str):
+        self.memberid = memberid
+        self.pin = pin
+        self.session = requests.Session()
 
-    def login(self, memberid: str, pin: str):
+
+    def login(self):
         try:
             login_response = self.session.post(
-                self.login_url,
-                data={"memberid": memberid, "pin": pin},
+                WCGC_BASE_URL,
+                data={"memberid": self.memberid, "pin": self.pin},
             )
             login_response.raise_for_status()
 
             return login_response
 
         except requests.exceptions.RequestException as e:
-            print(f"[login] Failed: {e}")
+            logging.error(f"[login] Failed: {e}", exc_info=True)
+            return None
+            
+    def logout(self):
+        try:
+            logout_response = self.session.get(WCGC_BASE_URL + WCGC_LOGOUT_ENDPOINT)
+            logout_response.raise_for_status()
 
+            return logout_response
+        except requests.exceptions.RequestException as e:
+            logging.error(f"[logout] Failed: {e}", exc_info=True)
+            return None
+
++
     def load_booking_page(self):
         try:
-            # Load the booking page
             booking_page_response = self.session.get(self.booking_page_url)
-            # Check for errors in the booking page response
             booking_page_response.raise_for_status()
 
-            # Accept conduct terms to proceed to booking page
             conduct_response = self.session.get(self.consent_url, allow_redirects=True)
-            # Check for errors in the conduct response
             conduct_response.raise_for_status()
 
             return conduct_response
 
         except requests.exceptions.RequestException as e:
-            print(f"[load_booking_page] Failed: {e}")
+            logging.error(f"[load_booking_page] Failed: {e}", exc_info=True)
+            return None
 
     def verify_login(self):
         # Check the reponse for successful login

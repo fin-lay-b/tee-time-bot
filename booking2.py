@@ -223,6 +223,7 @@ def get_inputs(row: str):
 
 if __name__ == "__main__":
     s = requests.Session()
+    print(s.auth)
 
     CERT_PATH = "./zscaler-root-ca.crt"
 
@@ -234,8 +235,11 @@ if __name__ == "__main__":
         cert_path=CERT_PATH,
     )
     print(login_response.cookies)
-    print(login_response.status_code)
-    print(login_response.headers)
+
+    s.close()
+    # print(login_response.cookies)
+    # print(login_response.status_code)
+    # print(login_response.headers)
 
     # load_response = load_booking_page(
     #     s,
